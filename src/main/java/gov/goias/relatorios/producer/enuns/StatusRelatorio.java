@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum StatusRelatorio {
+    EM_FILA("Em Fila"),
     AGENDADO("Agendado"),
     EM_EXECUCAO("Em Execução"),
     CONCLUIDO("Concluído"),

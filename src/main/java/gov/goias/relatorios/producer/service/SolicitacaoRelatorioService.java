@@ -42,15 +42,18 @@ public class SolicitacaoRelatorioService {
                 .sistema(request.sistema())
                 .agendarPara(request.agendarPara())
                 .dataSolicitacao(LocalDateTime.now())
-                .status(StatusRelatorio.AGENDADO)
                 .build();
 
         solicitacao.gerarIdSolicitacao();
         repository.save(solicitacao);
 
         if (solicitacao.getAgendarPara() == null) {
+            solicitacao.setStatus(StatusRelatorio.EM_FILA);
+            repository.save(solicitacao);
             kafkaProducer.enviarSolicitacaoRelatorio(solicitacao);
         } else {
+            solicitacao.setStatus(StatusRelatorio.AGENDADO);
+            repository.save(solicitacao);
             this.agendar(request);
         }
 
