@@ -1,4 +1,4 @@
-package gov.goias.relatorios.producer.relatorio;
+package gov.goias.relatorios.producer.dto;
 
 import java.time.LocalDateTime;
 
