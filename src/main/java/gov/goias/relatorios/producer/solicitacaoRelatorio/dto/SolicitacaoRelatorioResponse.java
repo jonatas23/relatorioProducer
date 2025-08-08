@@ -1,5 +1,5 @@
 // br.gov.go.financeiro.ipof.dto.response.SolicitacaoRelatorioResponse
-package gov.goias.relatorios.producer.dto;
+package gov.goias.relatorios.producer.solicitacaoRelatorio.dto;
 
 public record SolicitacaoRelatorioResponse(
     String idSolicitacao,

@@ -1,7 +1,6 @@
-package gov.goias.relatorios.producer.service;
+package gov.goias.relatorios.producer.solicitacaoRelatorio;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.goias.relatorios.producer.entity.SolicitacaoRelatorio;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.entity.SolicitacaoRelatorio;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KafkaProducerService {
+public class SolicitacaoRelatorioProducerService {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 

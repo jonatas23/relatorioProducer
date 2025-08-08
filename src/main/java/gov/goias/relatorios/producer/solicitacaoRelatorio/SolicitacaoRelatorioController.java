@@ -1,10 +1,9 @@
-package gov.goias.relatorios.producer.controller;
+package gov.goias.relatorios.producer.solicitacaoRelatorio;
 
-import gov.goias.relatorios.producer.dto.RelatorioStatusResponse;
-import gov.goias.relatorios.producer.dto.SolicitacaoRelatorioRequest;
-import gov.goias.relatorios.producer.dto.SolicitacaoRelatorioResponse;
-import gov.goias.relatorios.producer.enuns.StatusRelatorio;
-import gov.goias.relatorios.producer.service.SolicitacaoRelatorioService;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.dto.RelatorioStatusResponse;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.dto.SolicitacaoRelatorioRequest;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.dto.SolicitacaoRelatorioResponse;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.entity.enuns.StatusRelatorio;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +18,7 @@ import java.util.List;
 @RequestMapping("/api/relatorios")
 @CrossOrigin("*")
 @RequiredArgsConstructor
-public class RelatorioController {
+public class SolicitacaoRelatorioController {
 
     private final SolicitacaoRelatorioService service;
 

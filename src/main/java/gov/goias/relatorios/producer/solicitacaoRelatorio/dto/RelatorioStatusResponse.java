@@ -1,7 +1,7 @@
-package gov.goias.relatorios.producer.dto;
+package gov.goias.relatorios.producer.solicitacaoRelatorio.dto;
 
-import gov.goias.relatorios.producer.enuns.StatusRelatorio;
-import gov.goias.relatorios.producer.enuns.TipoRelatorio;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.entity.enuns.StatusRelatorio;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.entity.enuns.TipoRelatorio;
 
 import java.time.LocalDateTime;
 

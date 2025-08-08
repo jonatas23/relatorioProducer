@@ -1,15 +1,12 @@
 // br.gov.go.financeiro.ipof.service.SolicitacaoRelatorioService
-package gov.goias.relatorios.producer.service;
+package gov.goias.relatorios.producer.solicitacaoRelatorio;
 
-import gov.goias.relatorios.producer.dto.RelatorioDTO;
-import gov.goias.relatorios.producer.dto.RelatorioStatusResponse;
-import gov.goias.relatorios.producer.dto.SolicitacaoRelatorioRequest;
-import gov.goias.relatorios.producer.dto.SolicitacaoRelatorioResponse;
-import gov.goias.relatorios.producer.entity.SolicitacaoRelatorio;
-import gov.goias.relatorios.producer.enuns.StatusRelatorio;
-import gov.goias.relatorios.producer.enuns.TipoRelatorio;
-import gov.goias.relatorios.producer.job.RelatorioQuartzJob;
-import gov.goias.relatorios.producer.repository.SolicitacaoRelatorioRepository;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.dto.RelatorioStatusResponse;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.dto.SolicitacaoRelatorioRequest;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.dto.SolicitacaoRelatorioResponse;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.entity.SolicitacaoRelatorio;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.entity.enuns.StatusRelatorio;
+import gov.goias.relatorios.producer.solicitacaoRelatorio.entity.enuns.TipoRelatorio;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
@@ -20,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,7 +30,7 @@ import java.util.stream.Stream;
 public class SolicitacaoRelatorioService {
 
     private final SolicitacaoRelatorioRepository repository;
-    private final KafkaProducerService kafkaProducer;
+    private final SolicitacaoRelatorioProducerService kafkaProducer;
     private final Scheduler scheduler;
 
     public SolicitacaoRelatorioResponse criarSolicitacao(SolicitacaoRelatorioRequest request) {
@@ -40,12 +38,11 @@ public class SolicitacaoRelatorioService {
                 .tipoRelatorio(TipoRelatorio.valueOf(request.tipoRelatorio()))
                 .usuario(request.usuario())
                 .sistema(request.sistema())
-                .agendarPara(request.agendarPara())
+                .agendarPara(request.getAgendarParaLocal())
                 .dataSolicitacao(LocalDateTime.now())
                 .build();
 
         solicitacao.gerarIdSolicitacao();
-        repository.save(solicitacao);
 
         if (solicitacao.getAgendarPara() == null) {
             solicitacao.setStatus(StatusRelatorio.EM_FILA);
@@ -54,7 +51,7 @@ public class SolicitacaoRelatorioService {
         } else {
             solicitacao.setStatus(StatusRelatorio.AGENDADO);
             repository.save(solicitacao);
-            this.agendar(request);
+            this.agendar(solicitacao);
         }
 
         return new SolicitacaoRelatorioResponse(
@@ -116,26 +113,28 @@ public class SolicitacaoRelatorioService {
         return toResponse(atualizada);
     }
 
-    private void agendar(SolicitacaoRelatorioRequest request) {
+    private void agendar(SolicitacaoRelatorio request) {
         try {
             String jobId = UUID.randomUUID().toString();
 
-            JobDetail jobDetail = JobBuilder.newJob(RelatorioQuartzJob.class)
+            JobDetail jobDetail = JobBuilder.newJob(SolicitacaoRelatorioQuartzJob.class)
                     .withIdentity(jobId, "relatorios")
-                    .usingJobData("tipoRelatorio", request.tipoRelatorio())
-                    .usingJobData("usuario", request.usuario())
-                    .usingJobData("sistema", request.sistema())
-                    .usingJobData("agendarPara", request.agendarPara().toString())
+                    .usingJobData("idSolicitacao", request.getIdSolicitacao())
+                    .usingJobData("tipoRelatorio", request.getTipoRelatorio().getCodigo())
+                    .usingJobData("usuario", request.getUsuario())
+                    .usingJobData("sistema", request.getSistema())
+                    .usingJobData("agendarPara", request.getAgendarPara().toString())
+                    .usingJobData("dataSolicitacao", request.getDataSolicitacao().toString())
                     .build();
 
             Trigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity("trigger-" + jobId, "relatorios")
-                    .startAt(java.util.Date.from(request.agendarPara().atZone(ZoneId.systemDefault()).toInstant()))
+                    .startAt(Date.from(request.getAgendarPara().atZone(ZoneId.systemDefault()).toInstant()))
                     .withSchedule(SimpleScheduleBuilder.simpleSchedule())
                     .build();
 
             scheduler.scheduleJob(jobDetail, trigger);
-            log.info("[QUARTZ] Relatório agendado para: {}", request.agendarPara());
+            log.info("[QUARTZ] Relatório agendado para: {}", request.getAgendarPara());
         } catch (SchedulerException e) {
             log.error("Erro ao agendar relatório", e);
         }
